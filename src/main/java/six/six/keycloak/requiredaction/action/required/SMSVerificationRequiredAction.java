@@ -5,6 +5,7 @@ import org.keycloak.authentication.RequiredActionContext;
 import org.keycloak.authentication.RequiredActionProvider;
 import org.keycloak.credential.CredentialModel;
 import org.keycloak.models.*;
+import org.keycloak.models.utils.FormMessage;
 import six.six.keycloak.KeycloakSmsConstants;
 import six.six.keycloak.MobileNumberHelper;
 import six.six.keycloak.authenticator.KeycloakSmsAuthenticatorUtil;
@@ -23,7 +24,12 @@ public class SMSVerificationRequiredAction implements RequiredActionProvider {
     static final String PROVIDER_ID = "sms_verification";
     private static final String RESEND_CODE = "resend";
     private static final String UPDATE_MOBILE = "update_mobile";
-    private static final String MOBILE_NUMBER = "mobile_number";
+
+    private static final String FIELD_SMS_CODE = "smsCode";
+
+    private static final String SMS_VALIDATION_FTL = "sms-validation.ftl";
+    private static final String SMS_VaLIDATION_ERROR_FTL = "sms-validation-error.ftl";
+    private static final String SMS_VALIDATION_MOBILE_NUMBER_FTL = "sms-validation-mobile-number.ftl";
 
     private enum CODE_STATUS {
         VALID,
@@ -66,12 +72,14 @@ public class SMSVerificationRequiredAction implements RequiredActionProvider {
 
                     storeSMSCode(context, code, new Date().getTime() + (ttl * 1000)); // s --> ms
                     if (KeycloakSmsAuthenticatorUtil.sendSmsCode(mobileNumber, code, context, config)) {
-                        Response challenge = context.form().createForm("sms-validation.ftl");
+                        Response challenge = context.form()
+                                .setInfo(code)
+                                .createForm(SMS_VALIDATION_FTL);
                         context.challenge(challenge);
                     } else {
                         Response challenge = context.form()
-                                .setError("sms-auth.not.send")
-                                .createForm("sms-validation-error.ftl");
+                                .setError(Messages.SMS_AUTH_NOT_SEND)
+                                .createForm(SMS_VaLIDATION_ERROR_FTL);
                         context.challenge(challenge);
                     }
                 } else {
@@ -83,8 +91,8 @@ public class SMSVerificationRequiredAction implements RequiredActionProvider {
                     } else {
                         // The mobile number is NOT configured --> complain
                         Response challenge = context.form()
-                                .setError("sms-auth.not.mobile")
-                                .createForm("sms-validation-error.ftl");
+                                .setError(Messages.SMS_AUTH_NOT_MOBILE)
+                                .createForm(SMS_VaLIDATION_ERROR_FTL);
                         context.challenge(challenge);
                     }
                 }
@@ -102,22 +110,24 @@ public class SMSVerificationRequiredAction implements RequiredActionProvider {
         RequiredActionProviderModel model = getRequiredActionProviderModel(context.getRealm());
 
         if (model != null && model.getConfig() != null) {
+            List<FormMessage> errors = new ArrayList<>();
             Map<String, String> config = model.getConfig();
 
             MultivaluedMap<String, String> formData = context.getHttpRequest().getFormParameters();
 
             if(formData.containsKey(RESEND_CODE)) {
+                context.form().setInfo(Messages.SMS_AUTH_SEND);
                 requiredActionChallenge(context);
             } else if(formData.containsKey(UPDATE_MOBILE)) {
                 UserModel user = context.getUser();
                 String mobileNumber = MobileNumberHelper.getMobileNumber(user);
 
                 Response challenge = context.form()
-                        .setAttribute("phoneNumber", mobileNumber)
-                        .createForm("sms-validation-mobile-number.ftl");
+                        .setAttribute(KeycloakSmsConstants.ATTR_MOBILE, mobileNumber)
+                        .createForm(SMS_VALIDATION_MOBILE_NUMBER_FTL);
                 context.challenge(challenge);
-            } else if(formData.containsKey(MOBILE_NUMBER)) {
-                String answer = (context.getHttpRequest().getDecodedFormParameters().getFirst("mobile_number"));
+            } else if(formData.containsKey(KeycloakSmsConstants.ATTR_MOBILE)) {
+                String answer = (context.getHttpRequest().getDecodedFormParameters().getFirst(KeycloakSmsConstants.ATTR_MOBILE));
                 if (answer != null && answer.length() > 0 && isPhoneNumberValid(answer)) {
                     logger.debug("Valid matching mobile numbers supplied, save credential ...");
                     List<String> mobileNumber = new ArrayList<>();
@@ -129,9 +139,11 @@ public class SMSVerificationRequiredAction implements RequiredActionProvider {
                     requiredActionChallenge(context);
                 } else {
                     logger.debug("The field wasn\'t complete or is an invalid number...");
+                    errors.add(new FormMessage(KeycloakSmsConstants.ATTR_MOBILE, Messages.MOBILE_NUMBER_NO_VALID));
                     Response challenge = context.form()
-                            .setError("mobile_number.no.valid")
-                            .createForm("sms-validation-mobile-number.ftl");
+                            .setErrors(errors)
+                            .setAttribute(KeycloakSmsConstants.ATTR_MOBILE, answer)
+                            .createForm(SMS_VALIDATION_MOBILE_NUMBER_FTL);
                     context.challenge(challenge);
                 }
             } else {
@@ -139,16 +151,20 @@ public class SMSVerificationRequiredAction implements RequiredActionProvider {
                 Response challenge = null;
                 switch (status) {
                     case EXPIRED:
+                        errors.add(new FormMessage(FIELD_SMS_CODE, Messages.SMS_AUTH_CODE_EXPIRED));
                         challenge = context.form()
-                                .setError("sms-auth.code.expired")
-                                .createForm("sms-validation.ftl");
+                                .setErrors(errors)
+                                .setFormData(formData)
+                                .createForm(SMS_VALIDATION_FTL);
                         context.challenge(challenge);
                         break;
 
                     case INVALID:
+                        errors.add(new FormMessage(FIELD_SMS_CODE, Messages.SMS_AUTH_CODE_INVALID));
                         challenge = context.form()
-                                .setError("sms-auth.code.invalid")
-                                .createForm("sms-validation.ftl");
+                                .setErrors(errors)
+                                .setFormData(formData)
+                                .createForm(SMS_VALIDATION_FTL);
                         context.challenge(challenge);
                         break;
 

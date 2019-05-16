@@ -1,2 +1,3 @@
 six.six.keycloak.requiredaction.action.required.KeycloakSmsMobilenumberRequiredActionFactory
 six.six.keycloak.requiredaction.action.required.SMSVerificationRequiredActionFactory
+six.six.keycloak.requiredaction.action.required.UpdateExtendedProfileActionFactory
