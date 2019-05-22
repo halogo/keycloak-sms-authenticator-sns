@@ -196,10 +196,11 @@ public class KeycloakSmsAuthenticatorUtil {
             throw new RuntimeException("Number of digits must be bigger than 0");
         }
 
-        double maxValue = Math.pow(10.0, nrOfDigits); // 10 ^ nrOfDigits;
-        Random r = new Random();
-        long code = (long) (r.nextFloat() * maxValue);
-        return Long.toString(code);
+        int addition = (int)Math.pow(10, nrOfDigits - 1);
+        int seed = addition * 9;
+        Random rand = new Random();
+        int number = rand.nextInt(seed) + addition;
+        return Integer.toString(number);
     }
 
     /**
@@ -215,7 +216,7 @@ public class KeycloakSmsAuthenticatorUtil {
         } else if (isInternationalNumber(formattedPhoneNumber)) {
             region = null;
         } else {
-            return true; // If the number cannot be interpreted as an international or possible UK phone number, do not attempt to validate it.
+            return false; // If the number cannot be interpreted as an international or possible UK phone number, do not attempt to validate it.
         }
 
         try {
