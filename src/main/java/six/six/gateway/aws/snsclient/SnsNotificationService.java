@@ -17,7 +17,7 @@ public class SnsNotificationService implements SMSService {
     public boolean send(String phoneNumber, String message, String clientToken, String clientSecret) {
         Map<String, MessageAttributeValue> smsAttributes = new HashMap<String, MessageAttributeValue>();
         smsAttributes.put("AWS.SNS.SMS.SenderID", new MessageAttributeValue()
-                .withStringValue("Halo Go")
+                .withStringValue("HaloGo")
                 .withDataType("String"));
 
         String id= SnsClientFactory.getSnsClient(clientToken, clientSecret).publish(new PublishRequest()
