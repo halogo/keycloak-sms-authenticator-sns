@@ -196,7 +196,7 @@
   <properties>
     <version.picketbox>5.0.2.Final</version.picketbox>
     <version.wildfly>14.0.1.Final</version.wildfly>
-    <version.aws-java-sdk-sns>1.11.548</version.aws-java-sdk-sns>
+    <version.aws-java-sdk-sns>1.11.575</version.aws-java-sdk-sns>
     <version.libphonenumber>8.10.11</version.libphonenumber>
     <maven.compiler.target>1.8</maven.compiler.target>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

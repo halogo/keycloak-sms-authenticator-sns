@@ -2,6 +2,7 @@ package six.six.gateway.aws.snsclient;
 
 import com.amazonaws.services.sns.model.MessageAttributeValue;
 import com.amazonaws.services.sns.model.PublishRequest;
+import com.amazonaws.services.sns.model.PublishResult;
 import six.six.gateway.SMSService;
 
 import java.util.HashMap;
@@ -15,16 +16,20 @@ public class SnsNotificationService implements SMSService {
     //TODO Implement proxy
 
     public boolean send(String phoneNumber, String message, String clientToken, String clientSecret) {
-        Map<String, MessageAttributeValue> smsAttributes = new HashMap<String, MessageAttributeValue>();
+        Map<String, MessageAttributeValue> smsAttributes = new HashMap<>();
         smsAttributes.put("AWS.SNS.SMS.SenderID", new MessageAttributeValue()
                 .withStringValue("HaloGo")
                 .withDataType("String"));
 
-        String id= SnsClientFactory.getSnsClient(clientToken, clientSecret).publish(new PublishRequest()
+        smsAttributes.put("AWS.SNS.SMS.SMSType", new MessageAttributeValue()
+                .withStringValue("Transactional")
+                .withDataType("String"));
+
+        PublishResult result = SnsClientFactory.getSnsClient(clientToken, clientSecret).publish(new PublishRequest()
                 .withMessage(message)
                 .withPhoneNumber(phoneNumber)
-                .withMessageAttributes(smsAttributes)).getMessageId();
+                .withMessageAttributes(smsAttributes));
 
-        return (id!=null);
+        return (result.getMessageId()!=null);
     }
 }
