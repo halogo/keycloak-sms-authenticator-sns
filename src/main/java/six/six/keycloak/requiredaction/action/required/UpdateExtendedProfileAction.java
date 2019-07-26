@@ -74,27 +74,27 @@ public class UpdateExtendedProfileAction implements RequiredActionProvider, Requ
             return;
         }
 
-        if (realm.isEditUsernameAllowed()) {
-            String username = formData.getFirst("username");
-            String oldUsername = user.getUsername();
-
-            boolean usernameChanged = !Objects.equals(oldUsername, username);
-
-            if (usernameChanged) {
-
-                if (session.users().getUserByUsername(username, realm) != null) {
-                    Response challenge = context.form()
-                            .setError(Messages.USERNAME_EXISTS)
-                            .setFormData(formData)
-                            .createResponse(UserModel.RequiredAction.UPDATE_PROFILE);
-                    context.challenge(challenge);
-                    return;
-                }
-
-                user.setUsername(username);
-            }
-
-        }
+//        if (realm.isEditUsernameAllowed()) {
+//            String username = formData.getFirst("username");
+//            String oldUsername = user.getUsername();
+//
+//            boolean usernameChanged = !Objects.equals(oldUsername, username);
+//
+//            if (usernameChanged) {
+//
+//                if (session.users().getUserByUsername(username, realm) != null) {
+//                    Response challenge = context.form()
+//                            .setError(Messages.USERNAME_EXISTS)
+//                            .setFormData(formData)
+//                            .createResponse(UserModel.RequiredAction.UPDATE_PROFILE);
+//                    context.challenge(challenge);
+//                    return;
+//                }
+//
+//                user.setUsername(username);
+//            }
+//
+//        }
 
         user.setFirstName(formData.getFirst("firstName"));
         user.setLastName(formData.getFirst("lastName"));
