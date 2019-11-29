@@ -73,7 +73,7 @@ public class SMSVerificationRequiredAction implements RequiredActionProvider {
                     storeSMSCode(context, code, new Date().getTime() + (ttl * 1000)); // s --> ms
                     if (KeycloakSmsAuthenticatorUtil.sendSmsCode(mobileNumber, code, context, config)) {
                         Response challenge = context.form()
-                                .setInfo(code)
+//                                .setInfo(code)
                                 .createForm(SMS_VALIDATION_FTL);
                         context.challenge(challenge);
                     } else {
