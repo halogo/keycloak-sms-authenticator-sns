@@ -17,7 +17,7 @@ import java.util.Set;
 /**
  * Created by nickpack on 15/08/2017.
  */
-public class KeycloakSmsMobilenumberCredentialProvider implements CredentialProvider, CredentialInputValidator, CredentialInputUpdater, OnUserCache {
+public class KeycloakSmsMobilenumberCredentialProvider implements CredentialProvider<CredentialModel>, CredentialInputValidator, CredentialInputUpdater, OnUserCache {
     public static final String MOBILE_NUMBER = "mobile_number";
     public static final String CACHE_KEY = KeycloakSmsMobilenumberCredentialProvider.class.getName() + "." + MOBILE_NUMBER;
 
@@ -106,5 +106,42 @@ public class KeycloakSmsMobilenumberCredentialProvider implements CredentialProv
     public void onCache(RealmModel realm, CachedUserModel user, UserModel delegate) {
         List<CredentialModel> creds = session.userCredentialManager().getStoredCredentialsByType(realm, user, MOBILE_NUMBER);
         if (!creds.isEmpty()) user.getCachedWith().put(CACHE_KEY, creds.get(0));
+    }
+
+    @Override
+    public String getType() {
+        return "mobile";
+    }
+
+    @Override
+    public CredentialModel createCredential(RealmModel realmModel, UserModel userModel, CredentialModel credentialModel) {
+        return getCredentialStore().createCredential(realmModel, userModel, credentialModel);
+    }
+
+    @Override
+    public boolean deleteCredential(RealmModel realmModel, UserModel userModel, String credentialId) {
+        return getCredentialStore().removeStoredCredential(realmModel, userModel, credentialId);
+    }
+
+    @Override
+    public CredentialModel getCredentialFromModel(CredentialModel credentialModel) {
+        return credentialModel;
+    }
+
+    @Override
+    public CredentialTypeMetadata getCredentialTypeMetadata(CredentialTypeMetadataContext metadataContext) {
+        return CredentialTypeMetadata.builder()
+                .type(getType())
+                .category(CredentialTypeMetadata.Category.TWO_FACTOR)
+                .displayName("mobile-display-name")
+                .helpText("mobile-help-text")
+                .iconCssClass("kcAuthenticatorMobileClass")
+//                .createAction(UserModel.RequiredAction.CONFIGURE_TOTP.toString())
+                .removeable(true)
+                .build(session);
+    }
+
+    private UserCredentialStore getCredentialStore() {
+        return session.userCredentialManager();
     }
 }

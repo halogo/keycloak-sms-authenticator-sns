@@ -18,7 +18,7 @@ import java.util.Set;
 /**
  * Created by nickpack on 09/08/2017.
  */
-public class KeycloakSmsAuthenticatorCredentialProvider implements CredentialProvider, CredentialInputValidator, CredentialInputUpdater, OnUserCache {
+public class KeycloakSmsAuthenticatorCredentialProvider implements CredentialProvider<CredentialModel>, CredentialInputValidator, CredentialInputUpdater, OnUserCache {
     private static final String CACHE_KEY = KeycloakSmsAuthenticatorCredentialProvider.class.getName() + "." + KeycloakSmsConstants.USR_CRED_MDL_SMS_CODE;
 
     private final KeycloakSession session;
@@ -107,5 +107,42 @@ public class KeycloakSmsAuthenticatorCredentialProvider implements CredentialPro
         if (!creds.isEmpty()) {
             user.getCachedWith().put(CACHE_KEY, creds.get(0));
         }
+    }
+
+    @Override
+    public String getType() {
+        return "smsCode";
+    }
+
+    @Override
+    public CredentialModel createCredential(RealmModel realmModel, UserModel userModel, CredentialModel credentialModel) {
+        return getCredentialStore().createCredential(realmModel, userModel, credentialModel);
+    }
+
+    @Override
+    public boolean deleteCredential(RealmModel realmModel, UserModel userModel, String credentialId) {
+        return getCredentialStore().removeStoredCredential(realmModel, userModel, credentialId);
+    }
+
+    @Override
+    public CredentialModel getCredentialFromModel(CredentialModel credentialModel) {
+        return credentialModel;
+    }
+
+    @Override
+    public CredentialTypeMetadata getCredentialTypeMetadata(CredentialTypeMetadataContext metadataContext) {
+        return CredentialTypeMetadata.builder()
+                .type(getType())
+                .category(CredentialTypeMetadata.Category.TWO_FACTOR)
+                .displayName("sms-display-name")
+                .helpText("sms-help-text")
+                .iconCssClass("kcAuthenticatorSMSClass")
+//                .createAction(UserModel.RequiredAction.CONFIGURE_TOTP.toString())
+                .removeable(true)
+                .build(session);
+    }
+
+    private UserCredentialStore getCredentialStore() {
+        return session.userCredentialManager();
     }
 }

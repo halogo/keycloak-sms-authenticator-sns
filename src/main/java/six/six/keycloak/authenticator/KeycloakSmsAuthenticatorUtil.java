@@ -21,10 +21,7 @@ import six.six.keycloak.EnvSubstitutor;
 import six.six.keycloak.KeycloakSmsConstants;
 
 import java.io.IOException;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Random;
+import java.util.*;
 
 /**
  * Created by joris on 18/11/2016.
@@ -129,16 +126,36 @@ public class KeycloakSmsAuthenticatorUtil {
     private static String getMessage(String key, RealmModel realm, KeycloakSession session, UserModel user) {
         String result = null;
         try {
-            ThemeProvider themeProvider = session.getProvider(ThemeProvider.class, "extending");
-            Theme currentTheme = themeProvider.getTheme(realm.getLoginTheme(), Theme.Type.LOGIN);
-            Locale locale = session.getContext().resolveLocale(user);
-            result = currentTheme.getMessages(locale).getProperty(key);
+            Theme currentTheme = findTheme(session, realm.getLoginTheme(), Theme.Type.LOGIN);
+            if(currentTheme != null) {
+                Locale locale = session.getContext().resolveLocale(user);
+                result = currentTheme.getMessages(locale).getProperty(key);
+            }
         } catch (IOException e) {
             logger.warn(key + "not found in messages");
         }
         return result;
     }
 
+    private static Theme findTheme(KeycloakSession session, String name, Theme.Type type) {
+        for (ThemeProvider p : getProviders(session)) {
+            if (p.hasTheme(name, type)) {
+                try {
+                    return p.getTheme(name, type);
+                } catch (IOException e) {
+                    logger.errorv(e, p.getClass() + " failed to load theme, type={0}, name={1}", type, name);
+                }
+            }
+        }
+        return null;
+    }
+
+    private static List<ThemeProvider> getProviders(KeycloakSession session) {
+        LinkedList<ThemeProvider> providers = new LinkedList<>(session.getAllProviders(ThemeProvider.class));
+        providers.sort((o1, o2) -> o2.getProviderPriority() - o1.getProviderPriority());
+
+        return providers;
+    }
 
     public static boolean sendSmsCode(String mobileNumber, String code, RequiredActionContext context, Map<String, String> config) {
         return sendSmsCode(mobileNumber, code, config, context.getRealm(), context.getSession(), context.getUser());

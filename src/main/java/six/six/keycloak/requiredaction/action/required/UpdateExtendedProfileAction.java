@@ -25,7 +25,8 @@ import static six.six.keycloak.authenticator.KeycloakSmsAuthenticatorUtil.isPhon
 
 public class UpdateExtendedProfileAction implements RequiredActionProvider, RequiredActionFactory, DisplayTypeRequiredActionFactory {
     private static final String USER_ATTRIBUTES_PREFIX = "user.attributes.";
-    private static final String FIELD_MOBILE_NUMBER = USER_ATTRIBUTES_PREFIX + KeycloakSmsConstants.ATTR_MOBILE;
+    private static final String FIELD_MOBILE_PREFIX = "mobile_prefix";
+    private static final String FIELD_MOBILE_NUMBER = KeycloakSmsConstants.ATTR_MOBILE;
     private static final String FIELD_POSTCODE = USER_ATTRIBUTES_PREFIX + "postcode";
     static final String PROVIDER_ID = "halogo-update-extended-profile";
 
@@ -55,7 +56,7 @@ public class UpdateExtendedProfileAction implements RequiredActionProvider, Requ
 
         List<FormMessage> errors = Validation.validateUpdateProfileForm(realm, formData);
 
-        String mobileNumber = formData.getFirst(FIELD_MOBILE_NUMBER);
+        String mobileNumber = formData.getFirst(FIELD_MOBILE_PREFIX) + formData.getFirst(FIELD_MOBILE_NUMBER);
         if (mobileNumber == null || !(mobileNumber.length() > 0 && isPhoneNumberValid(mobileNumber))) {
             errors.add(new FormMessage(FIELD_MOBILE_NUMBER, six.six.keycloak.requiredaction.action.required.Messages.MOBILE_NUMBER_NO_VALID));
         }

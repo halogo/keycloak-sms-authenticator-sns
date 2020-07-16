@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>six.six</groupId>
   <artifactId>keycloak-sms-authenticator-sns</artifactId>
-  <version>2.0.0</version>
+  <version>10.0.0</version>
   <build>
     <plugins>
       <plugin>
@@ -55,7 +55,7 @@
     <dependency>
       <groupId>org.keycloak</groupId>
       <artifactId>keycloak-core</artifactId>
-      <version>4.8.3.Final</version>
+      <version>10.0.0</version>
       <scope>provided</scope>
       <exclusions>
         <exclusion>
@@ -79,14 +79,20 @@
     <dependency>
       <groupId>org.keycloak</groupId>
       <artifactId>keycloak-server-spi</artifactId>
-      <version>4.8.3.Final</version>
+      <version>10.0.0</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.keycloak</groupId>
       <artifactId>keycloak-server-spi-private</artifactId>
-      <version>4.8.3.Final</version>
+      <version>10.0.0</version>
       <scope>provided</scope>
+      <exclusions>
+        <exclusion>
+          <artifactId>uap-java</artifactId>
+          <groupId>com.github.ua-parser</groupId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>org.jboss.logging</groupId>
@@ -97,15 +103,15 @@
     <dependency>
       <groupId>org.keycloak</groupId>
       <artifactId>keycloak-services</artifactId>
-      <version>4.8.3.Final</version>
+      <version>10.0.0</version>
       <scope>provided</scope>
       <exclusions>
         <exclusion>
-          <artifactId>javax.mail-api</artifactId>
-          <groupId>javax.mail</groupId>
+          <artifactId>jakarta.mail</artifactId>
+          <groupId>com.sun.mail</groupId>
         </exclusion>
         <exclusion>
-          <artifactId>javax.json</artifactId>
+          <artifactId>jakarta.json</artifactId>
           <groupId>org.glassfish</groupId>
         </exclusion>
         <exclusion>
@@ -121,7 +127,7 @@
           <groupId>org.jboss.spec.javax.ws.rs</groupId>
         </exclusion>
         <exclusion>
-          <artifactId>jboss-transaction-api_1.2_spec</artifactId>
+          <artifactId>jboss-transaction-api_1.3_spec</artifactId>
           <groupId>org.jboss.spec.javax.transaction</groupId>
         </exclusion>
         <exclusion>
@@ -145,12 +151,20 @@
           <groupId>com.openshift</groupId>
         </exclusion>
         <exclusion>
+          <artifactId>webauthn4j-core</artifactId>
+          <groupId>com.webauthn4j</groupId>
+        </exclusion>
+        <exclusion>
           <artifactId>bcprov-jdk15on</artifactId>
           <groupId>org.bouncycastle</groupId>
         </exclusion>
         <exclusion>
           <artifactId>bcpkix-jdk15on</artifactId>
           <groupId>org.bouncycastle</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>keycloak-common</artifactId>
+          <groupId>org.keycloak</groupId>
         </exclusion>
         <exclusion>
           <artifactId>jackson-databind</artifactId>
@@ -205,6 +219,6 @@
     <version.notify-client>3.14.2-RELEASE</version.notify-client>
     <version.commons-lang>2.6</version.commons-lang>
     <maven.compiler.source>1.8</maven.compiler.source>
-    <version.keycloak>4.8.3.Final</version.keycloak>
+    <version.keycloak>10.0.0</version.keycloak>
   </properties>
 </project>
